@@ -1,0 +1,9 @@
+name = "wasabi-uploader"
+main = "_worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+BUCKET_NAME = "image-upload-original"
+
+[[assets]]
+directory = "."
