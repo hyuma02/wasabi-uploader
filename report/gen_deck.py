@@ -37,6 +37,27 @@ WEEKS = [
              "3-2-1構成のマネージド型。IPA 6か条と相性良（DB 8/29）"),
         ],
         "note": "補欠: 名鉄協商・約1か月のサービス停止（DB 8/23）／REXT続報：RIZAPグループ・APORITO事業に波及",
+        "feature": {
+            "eyebrow_jp": "海外事例", "eyebrow_en": "CASE: STATE OF NEVADA",
+            "headline": "米ネバダ州、バックアップを削除され60超の州機関が停止",
+            "sub": "侵入から約3か月の潜伏の後、攻撃者はまずバックアップを消し、それから暗号化した。",
+            "left_title": "事件の経過",
+            "left_rows": [
+                ("5/14 侵入", ["マルウェア入りの管理ツール経由で侵入", "（発覚まで約3か月の潜伏）"]),
+                ("潜伏・拡大", ["26アカウントの認証情報を窃取し", "権限を拡大"]),
+                ("破壊", ["バックアップボリュームを削除", "（復旧手段を先に潰す）"]),
+                ("8/24 暗号化", ["仮想マシンを暗号化、州全体で", "システム障害が顕在化"]),
+            ],
+            "right_title": "影響の規模",
+            "right_stats": [
+                ("60超", ["DMV・保健福祉・公安などの州機関で", "Web・電話・窓口サービスが停止"]),
+                ("約3か月", ["侵入から発覚までの潜伏期間", "（短い保持期間では汚染前に戻れない）"]),
+            ],
+            "callout": ["リテンション期間中は管理者権限でも削除できないObject Lockであれば、",
+                        "「バックアップ削除→暗号化」という攻撃の定石は成立しない。"],
+            "takeaway": "攻撃者はまずバックアップを消す。「消せない置き場」が最後の砦になる。",
+            "source": "出典：米ネバダ州の公表および各種報道（2026年8月）より作成。",
+        },
     },
     {
         "period": "2026年8月17日〜8月23日",
@@ -60,6 +81,25 @@ WEEKS = [
              "DMA指定へ・エグレスはPB約9万ドル・乗換障壁1位（DB 8/19）"),
         ],
         "note": "補欠: 偽の復旧業者Ransom Busters（DB 8/21）／名鉄協商・約1か月のサービス停止（DB 8/23）",
+        "feature": {
+            "eyebrow_jp": "国内事例", "eyebrow_en": "CASE: NICHIREI VS ASAHI",
+            "headline": "ニチレイは約10日、アサヒは約7か月―復旧の明暗が被害額を分けた",
+            "sub": "同じランサムウェア被害でも、復旧に使えるバックアップと手順の有無で結果は大きく分かれる。",
+            "left_title": "ニチレイの事件要点",
+            "left_rows": [
+                ("7/13 発生", ["システム障害を検知し、即日", "ネットワークを物理・論理遮断"]),
+                ("影響", ["約5,000社の低温物流ハブが停止、", "KFC等のサプライチェーンに波及"]),
+                ("犯行", ["RansomHouseが犯行声明。", "同社は身代金に応じず"]),
+                ("復旧", ["7/17に出荷を順次再開、", "7/24に全拠点で通常稼働"]),
+            ],
+            "right_title": "復旧期間の対比",
+            "right_bars": [("ニチレイ", 10, "約10日"), ("アサヒGHD", 210, "約7か月")],
+            "right_note": "※ アサヒGHDは営業利益ベースで約370億円弱の減益（供給停止＋復旧費）。",
+            "callout": ["一般統計でも復旧速度は二極化：バックアップが無事なら1週間以内の復旧46%、",
+                        "バックアップを侵害されると26%にとどまる（2026年復旧統計）。"],
+            "takeaway": "復旧の早さが被害額を決める。鍵は「無事に残るバックアップ」と検証済みの復旧手順。",
+            "source": "出典：ニチレイ公表・報道、アサヒGHD開示、CNIC復旧統計2026より作成。",
+        },
     },
     {
         "period": "2026年8月8日〜8月16日",
@@ -100,7 +140,7 @@ IN = 72.0
 PW, PH = 13.333 * IN, 7.5 * IN
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "現状レポート.pdf")
 c = canvas.Canvas(OUT, pagesize=(PW, PH))
-TOTAL = 4 + len(WEEKS)  # 本編ページ数（表紙除く）
+TOTAL = 4 + sum(1 + (1 if wk.get("feature") else 0) for wk in WEEKS)  # 本編ページ数（表紙除く）
 
 def X(v): return v * IN
 def Yt(v): return PH - v * IN
@@ -330,6 +370,45 @@ footer("出典：IPA「ランサムウェア対策特設ページ」「ランサ
 c.showPage()
 
 # =================== WEEKLY PICKUP PAGES ===================
+def render_feature(f, page_no):
+    c.setFillColor(WHITE); c.rect(0, 0, PW, PH, fill=1, stroke=0)
+    header(f["eyebrow_jp"], f["eyebrow_en"], f["headline"], f.get("sub"))
+    # left rows
+    lx = 0.55
+    text(lx, 2.15, f["left_title"], 12.5, ACCENT, bold=True)
+    ry = 2.6
+    for label, lines in f["left_rows"]:
+        text(lx + 0.05, ry + 0.02, label, 12.5, PRIMARY, bold=True)
+        vtext(lx + 1.55, ry + 0.03, lines, 11, DARK, lh=1.3)
+        hline(lx, lx + 5.7, ry + 0.7, RULE, 0.5)
+        ry += 0.8
+    # right block
+    rx, rw = 6.7, 6.08
+    text(rx, 2.15, f["right_title"], 12.5, ACCENT, bold=True)
+    byy = 2.65
+    if f.get("right_bars"):
+        maxval = max(v for _, v, _ in f["right_bars"])
+        for label, val, disp in f["right_bars"]:
+            text(rx, byy, label, 12, DARK, bold=True)
+            bw = max(0.12, 3.5 * val / maxval)
+            rect(rx + 1.6, byy + 0.02, bw, 0.32, fill=PRIMARY)
+            text(rx + 1.6 + bw + 0.12, byy + 0.05, disp, 12, ACCENT, bold=True)
+            byy += 0.62
+        if f.get("right_note"):
+            vtext(rx, byy + 0.05, [f["right_note"]], 9.5, MUTED)
+            byy += 0.4
+    if f.get("right_stats"):
+        for big, lines in f["right_stats"]:
+            rrect(rx, byy, rw, 0.9, fill=LIGHT)
+            text(rx + 0.2, byy + 0.28, big, 20, ACCENT, bold=True)
+            vtext(rx + 1.9, byy + 0.18, lines, 10.5, DARK, lh=1.3)
+            byy += 1.05
+    callout(rx, max(byy + 0.15, 4.55), rw, 0.85, f["callout"], 10)
+    takeaway(f["takeaway"])
+    footer(f["source"], page_no)
+    c.showPage()
+
+_page = 5
 for wk in sorted(WEEKS, key=lambda w: w["no"]):
     c.setFillColor(WHITE); c.rect(0, 0, PW, PH, fill=1, stroke=0)
     header("週次ピックアップ", "WEEKLY HIGHLIGHTS",
@@ -348,8 +427,12 @@ for wk in sorted(WEEKS, key=lambda w: w["no"]):
     if wk.get("note"):
         text(0.57, iy + 0.02, "※ " + wk["note"], 9.5, MUTED)
     takeaway("この週のピックはDB「Wasabi 販促ニュース（データ保護）」および週次ピックアップ（Notion）と対応。")
-    footer("出典：各ピックの出典はDB登録ページを参照。", 4 + wk["no"])
+    footer("出典：各ピックの出典はDB登録ページを参照。", _page)
     c.showPage()
+    _page += 1
+    if wk.get("feature"):
+        render_feature(wk["feature"], _page)
+        _page += 1
 
 c.save()
 print("saved:", OUT, "pages:", 1 + TOTAL)
